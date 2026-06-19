@@ -12,20 +12,13 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger CY campaign snapshot if missing
+      - name: Trigger CY campaign snapshot
         env:
           DISPATCH_PAT: ${{ secrets.DISPATCH_PAT }}
-          BOLTABLE_TOKEN: ${{ secrets.BOLTABLE_REPO_TOKEN }}
         run: |
           set -euo pipefail
           TODAY=$(TZ=Asia/Nicosia date +%Y-%m-%d)
-          if [ -n "${BOLTABLE_TOKEN:-}" ] && gh api \
-              "repos/boltable/wolt-cy-campaigns/contents/snapshots/${TODAY}.json" \
-              --header "Authorization: Bearer ${BOLTABLE_TOKEN}" &>/dev/null; then
-            echo "Snapshot for ${TODAY} exists."
-            exit 0
-          fi
-          echo "Dispatching snapshot for ${TODAY}…"
+          echo "Dispatching snapshot check for ${TODAY}…"
           gh api --method POST \
             repos/ioannissocratous-dotcom/wolt-cy-campaigns-cron/dispatches \
             --header "Authorization: Bearer ${DISPATCH_PAT}" \
