@@ -1,12 +1,13 @@
 name: Daily snapshot ping
 
 on:
-  schedule:
-    # Public-repo schedules are more reliable than private cron repos.
-    - cron: "18 10 * * *"   # 13:18 Cyprus (EEST)
-    - cron: "30 11 * * *"   # 14:30 Cyprus backup
-    - cron: "0 12 * * *"    # 15:00 Cyprus backup
+  push:
+    paths:
+      - .last-ping
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   ping:
@@ -19,8 +20,7 @@ jobs:
         run: |
           set -euo pipefail
           TODAY=$(TZ=Asia/Nicosia date +%Y-%m-%d)
-          echo "Dispatching snapshot check for ${TODAY}…"
+          echo "Heartbeat received — dispatching snapshot for ${TODAY}…"
           gh api --method POST \
             repos/ioannissocratous-dotcom/wolt-cy-campaigns-cron/dispatches \
-            --header "Authorization: Bearer ${DISPATCH_PAT}" \
             -f event_type=daily-snapshot
