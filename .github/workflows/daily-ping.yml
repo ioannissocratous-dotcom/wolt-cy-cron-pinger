@@ -1,6 +1,14 @@
 name: Daily snapshot ping
 
 on:
+  schedule:
+    # Public-repo schedules are our primary cloud trigger (no Mac needed).
+    # Staggered UTC times ≈ 11:00–17:00 Cyprus (EEST = UTC+3).
+    - cron: "0 8 * * *"    # 11:00 Cyprus
+    - cron: "20 10 * * *"  # 13:20 Cyprus
+    - cron: "0 12 * * *"   # 15:00 Cyprus
+    - cron: "30 12 * * *"  # 15:30 Cyprus
+    - cron: "0 14 * * *"   # 17:00 Cyprus
   push:
     paths:
       - .last-ping
@@ -9,18 +17,27 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cy-daily-ping
+  cancel-in-progress: false
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger CY campaign snapshot
+      - name: Trigger CY campaign snapshot if missing
         env:
           DISPATCH_PAT: ${{ secrets.DISPATCH_PAT }}
           GH_TOKEN: ${{ secrets.DISPATCH_PAT }}
         run: |
           set -euo pipefail
           TODAY=$(TZ=Asia/Nicosia date +%Y-%m-%d)
-          echo "Heartbeat received — dispatching snapshot for ${TODAY}…"
+          echo "Cyprus date: ${TODAY}"
+          if gh api "repos/boltable/wolt-cy-campaigns/contents/snapshots/${TODAY}.json" &>/dev/null; then
+            echo "Snapshot ${TODAY} already exists — skip."
+            exit 0
+          fi
+          echo "No snapshot for ${TODAY} — dispatching…"
           gh api --method POST \
             repos/ioannissocratous-dotcom/wolt-cy-campaigns-cron/dispatches \
             -f event_type=daily-snapshot
