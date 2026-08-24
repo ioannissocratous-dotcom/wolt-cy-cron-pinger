@@ -33,7 +33,7 @@ jobs:
           set -euo pipefail
           TODAY=$(TZ=Asia/Nicosia date +%Y-%m-%d)
           echo "Cyprus date: ${TODAY}"
-          if gh api "repos/boltable/wolt-cy-campaigns/contents/snapshots/${TODAY}.json" &>/dev/null; then
+          if gh api "repos/boltable/campaigns-diary/contents/snapshots/${TODAY}.json" &>/dev/null; then
             echo "Snapshot ${TODAY} already exists — skip."
             exit 0
           fi
