@@ -1,17 +1,6 @@
-name: Daily snapshot ping
+name: Daily snapshot ping (backup)
 
 on:
-  schedule:
-    # Public-repo schedules are our primary cloud trigger (no Mac needed).
-    # Staggered UTC times ≈ 11:00–17:00 Cyprus (EEST = UTC+3).
-    - cron: "0 8 * * *"    # 11:00 Cyprus
-    - cron: "20 10 * * *"  # 13:20 Cyprus
-    - cron: "0 12 * * *"   # 15:00 Cyprus
-    - cron: "30 12 * * *"  # 15:30 Cyprus
-    - cron: "0 14 * * *"   # 17:00 Cyprus
-  push:
-    paths:
-      - .last-ping
   workflow_dispatch:
 
 permissions:
@@ -25,7 +14,7 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger CY campaign snapshot if missing
+      - name: Trigger campaign snapshot if missing
         env:
           DISPATCH_PAT: ${{ secrets.DISPATCH_PAT }}
           GH_TOKEN: ${{ secrets.DISPATCH_PAT }}
